@@ -1,6 +1,5 @@
 import streamlit as st
 from streamlit.logger import get_logger
-from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 
