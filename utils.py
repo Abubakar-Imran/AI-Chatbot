@@ -26,7 +26,7 @@ def display_msg(msg, author, page_key):
     st.chat_message(author).write(msg)
     
 def configure_llm():
-    llm = ChatOllama(model="llama3", base_url='http://10.2.10.68:11434')
+    llm = ChatOllama(model="llama3", base_url=st.secrets["OLLAMA_ENDPOINT"])
     return llm
 
 def print_qa(cls, question, answer):
