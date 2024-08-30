@@ -8,8 +8,7 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
-
-st.set_page_config(page_title="ChatPDF", page_icon="📄")
+st.set_page_config(page_title="Document Chat", page_icon="📄")
 st.header('Chat with your documents')
 st.write('Has access to custom documents and can respond to user queries by referring to the content within those documents')
 
@@ -19,7 +18,7 @@ class PyramidDocChatbot:
         utils.sync_st_session()
         self.llm = utils.configure_llm()
         self.embedding_model = utils.configure_embedding_model()
-
+        self.page_key = "document_messages" 
     def save_file(self, file):
         folder = 'tmp'
         if not os.path.exists(folder):
@@ -30,7 +29,7 @@ class PyramidDocChatbot:
             f.write(file.getvalue())
         return file_path
 
-    @st.spinner('Analyzing documents..')
+    @st.spinner('Analyzing documents...')
     def setup_qa_chain(self, uploaded_files):
         docs = []
         for file in uploaded_files:
@@ -47,7 +46,7 @@ class PyramidDocChatbot:
 
         retriever = vectordb.as_retriever(
             search_type='mmr',
-            search_kwargs={'k':2, 'fetch_k':4}
+            search_kwargs={'k': 2, 'fetch_k': 4}
         )
 
         system_prompt = (
@@ -70,7 +69,6 @@ class PyramidDocChatbot:
 
     @utils.enable_chat_history
     def main(self):
-
         uploaded_files = st.sidebar.file_uploader(label='Upload PDF files', type=['pdf'], accept_multiple_files=True)
         if not uploaded_files:
             st.error("Please upload PDF documents to continue!")
@@ -80,15 +78,15 @@ class PyramidDocChatbot:
 
         if uploaded_files and user_query:
             qa_chain = self.setup_qa_chain(uploaded_files)
-            utils.display_msg(user_query, 'user')
+            utils.display_msg(user_query, 'user', self.page_key)
 
             response = qa_chain.invoke({"input": user_query})
-            st.session_state.messages.append({"role": "assistant", "content": response["answer"]})
-            st.chat_message("assistant").write(response["answer"])
+            utils.display_msg(response["answer"], 'assistant', self.page_key)
+
             utils.print_qa(PyramidDocChatbot, user_query, response)
 
-            # to show references
-            for idx, doc in enumerate(response['context'],1):
+            # To show references
+            for idx, doc in enumerate(response['context'], 1):
                 filename = os.path.basename(doc.metadata['source'])
                 page_num = doc.metadata['page']
                 ref_title = f":blue[Reference {idx}: *{filename} - page.{page_num}*]"

@@ -1,4 +1,3 @@
-
 import os
 import streamlit as st
 from streamlit.logger import get_logger
@@ -9,31 +8,23 @@ from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 logger = get_logger('Langchain-Chatbot')
 
 def enable_chat_history(func):
-    st.session_state["messages"] = []
-    if os.environ.get("OPENAI_API_KEY"):
-        current_page = func.__qualname__
-        if "current_page" not in st.session_state:
-            st.session_state["current_page"] = current_page
-        if st.session_state["current_page"] != current_page:
-            try:
-                st.cache_resource.clear()
-                del st.session_state["current_page"]
-                del st.session_state["messages"]
-            except:
-                pass
+    def wrapper(*args, **kwargs):
+        instance = args[0]
+        page_key = instance.page_key
 
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
-        for msg in st.session_state["messages"]:
+        if page_key not in st.session_state:
+            st.session_state[page_key] = []
+            st.session_state[page_key].append({"role": "assistant", "content": "How can I help you?"})
+
+        for msg in st.session_state[page_key]:
             st.chat_message(msg["role"]).write(msg["content"])
 
-    def execute(*args, **kwargs):
         func(*args, **kwargs)
-    return execute
 
+    return wrapper
 
-def display_msg(msg, author):
-    st.session_state.messages.append({"role": author, "content": msg})
+def display_msg(msg, author, page_key):
+    st.session_state[page_key].append({"role": author, "content": msg})
     st.chat_message(author).write(msg)
     
 def configure_llm():
@@ -52,5 +43,3 @@ def configure_embedding_model():
 def sync_st_session():
     for k, v in st.session_state.items():
         st.session_state[k] = v
-        
-    

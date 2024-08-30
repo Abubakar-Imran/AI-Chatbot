@@ -11,9 +11,10 @@ class PyramidChatbot:
     def __init__(self):
         utils.sync_st_session()
         self.llm = utils.configure_llm()
+        self.page_key = "chatbot_messages" 
     
     def setup_chain(self):
-        prompt = ChatPromptTemplate.from_template(" {query}")
+        prompt = ChatPromptTemplate.from_template("{query}")
         chain = prompt | self.llm | StrOutputParser()
         return chain
     
@@ -22,15 +23,13 @@ class PyramidChatbot:
         chain = self.setup_chain()
 
         user_query = st.chat_input(placeholder="Ask me anything!")
-        
+
         if user_query:
-            utils.display_msg(user_query, 'user')
-            chain = self.setup_chain()
+            utils.display_msg(user_query, 'user', self.page_key)
             response = chain.invoke({"query": user_query})
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            st.chat_message("assistant").write(response)
+            utils.display_msg(response, 'assistant', self.page_key)
             utils.print_qa(PyramidChatbot, user_query, response)
-            
+
 if __name__ == "__main__":
     chatbot = PyramidChatbot()
     chatbot.main()
