@@ -17,14 +17,10 @@ class PyramidChatbot:
         chain = prompt | self.llm | StrOutputParser()
         return chain
     
+    @utils.enable_chat_history
     def main(self):
         chain = self.setup_chain()
-        
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
-        for msg in st.session_state["messages"]:
-            st.chat_message(msg["role"]).write(msg["content"])
-                
+
         user_query = st.chat_input(placeholder="Ask me anything!")
         
         if user_query:
