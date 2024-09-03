@@ -26,7 +26,7 @@ class PyramidChatbot:
 
         if user_query:
             utils.display_msg(user_query, 'user', self.page_key)
-            response = chain.invoke({"query": user_query})
+            response = chain.stream({"query": user_query})
             utils.display_msg(response, 'assistant', self.page_key)
             utils.print_qa(PyramidChatbot, user_query, response)
 
