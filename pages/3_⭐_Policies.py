@@ -17,6 +17,7 @@ class PyramidPolicyChatbot:
         self.llm = utils.configure_llm()
         self.embedding_model = utils.configure_embedding_model()
         self.page_key = "policy_messages"
+        self.qa_chain = self.setup_qa_chain()
 
     @st.spinner('Generating Response...')
     def setup_qa_chain(self):
@@ -61,10 +62,9 @@ class PyramidPolicyChatbot:
         user_query = st.chat_input(placeholder="Ask me anything!")
 
         if user_query:
-            qa_chain = self.setup_qa_chain()
             utils.display_msg(user_query, 'user', self.page_key)
 
-            response = qa_chain.invoke({"input": user_query})
+            response = self.qa_chain.invoke({"input": user_query})
             utils.display_msg(response["answer"], 'assistant', self.page_key)
 
             utils.print_qa(PyramidPolicyChatbot, user_query, response)
